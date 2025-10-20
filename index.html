@@ -33,181 +33,263 @@
         .error.active { display:block; }
         .completion { text-align:center; display:none; padding:24px; }
         .completion.active { display:block; }
-        @media (max-width:720px) { .buttons { flex-direction:column; } button { width:100%; } }
+        
+        /* Accessibility enhancements */
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 6px;
+            background: #003262;
+            color: white;
+            padding: 8px;
+            text-decoration: none;
+            border-radius: 4px;
+            z-index: 1000;
+        }
+        .skip-link:focus {
+            top: 6px;
+        }
+        
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+        
+        /* Focus styles */
+        *:focus {
+            outline: 2px solid #0066cc;
+            outline-offset: 2px;
+        }
+        
+        button:focus, input:focus, select:focus, textarea:focus {
+            outline: 2px solid #0066cc;
+            outline-offset: 2px;
+        }
+        
+        /* High contrast mode support */
+        @media (prefers-contrast: high) {
+            .option {
+                border: 2px solid #000;
+            }
+            .option:hover, .option:focus-within {
+                background: #f0f0f0;
+            }
+        }
+        
+        /* Reduced motion support */
+        @media (prefers-reduced-motion: reduce) {
+            .progress > .bar {
+                transition: none;
+            }
+            @keyframes fadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+        }
     </style>
 </head>
 <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    
     <div class="container">
-        <div class="header">
+        <header class="header" role="banner">
             <h1>CSUF MPA — Exit Survey (Early Exit)</h1>
             <p>Your anonymous feedback helps improve retention and student experience.</p>
-        </div>
+        </header>
 
-        <div class="intro">
-            Please answer the brief questions about why you left the MPA program. This form should take 5 minutes. Fields marked with * are required.
-        </div>
-
-        <div class="progress" aria-hidden="true"><div class="bar" id="progressBar"></div></div>
-
-        <div class="error" id="errorMessage"></div>
-
-        <form id="dropoutForm" action="https://formspree.io/f/mkgqekja" method="POST" novalidate>
-            <!-- Section 1 -->
-            <div class="section active" data-section="1">
-                <h2 style="color:#003262; margin-bottom:12px; font-size:18px;">1. Basic info</h2>
-
-                <div class="question">
-                    <label>Name (optional)</label>
-                    <input type="text" name="name" placeholder="You may leave blank to remain anonymous">
-                </div>
-
-                <div class="question">
-                    <label>Email (optional)</label>
-                    <input type="email" name="email" placeholder="If you'd like follow-up (optional)">
-                </div>
-
-                <div class="question">
-                    <label class="required">Last term enrolled (e.g., Fall 2024)</label>
-                    <input type="text" name="last_term" required>
-                </div>
-
+        <main id="main-content" role="main">
+            <div class="intro">
+                Please answer the brief questions about why you left the MPA program. This form should take 5 minutes. Fields marked with * are required.
             </div>
 
-            <!-- Section 2 -->
-            <div class="section" data-section="2">
-                <h2 style="color:#003262; margin-bottom:12px; font-size:18px;">2. Why did you leave?</h2>
-
-                <div class="question">
-                    <label class="required">Primary reason for leaving</label>
-                    <div class="radio-group">
-                        <label class="option"><input type="radio" name="primary_reason" value="financial" required> Financial reasons/cost</label>
-                        <label class="option"><input type="radio" name="primary_reason" value="time_conflict" required> Time/work/life conflict</label>
-                        <label class="option"><input type="radio" name="primary_reason" value="academic_difficulty" required> Academic difficulty</label>
-                        <label class="option"><input type="radio" name="primary_reason" value="program_mismatch" required> Program didn't meet expectations</label>
-                        <label class="option"><input type="radio" name="primary_reason" value="advising_issues" required> Advising / administrative issues</label>
-                        <label class="option"><input type="radio" name="primary_reason" value="health_personal" required> Health / personal reasons</label>
-                        <label class="option"><input type="radio" name="primary_reason" value="other" required> Other (please specify)</label>
-                    </div>
-                    <input type="text" name="primary_reason_other" id="primaryOther" placeholder="If other, please specify" style="margin-top:10px; display:none;">
-                </div>
-
-                <div class="question">
-                    <label>Were financial aid/scholarships a factor?</label>
-                    <div class="radio-group">
-                        <label class="option"><input type="radio" name="financial_aid_factor" value="yes"> Yes</label>
-                        <label class="option"><input type="radio" name="financial_aid_factor" value="no"> No</label>
-                        <label class="option"><input type="radio" name="financial_aid_factor" value="somewhat"> Somewhat</label>
-                    </div>
-                </div>
+            <div class="progress" role="progressbar" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100" aria-label="Form completion progress">
+                <div class="bar" id="progressBar"></div>
+                <div class="sr-only" id="progressText">Step 1 of 4 complete</div>
             </div>
 
-            <!-- Section 3 -->
-            <div class="section" data-section="3">
-                <h2 style="color:#003262; margin-bottom:12px; font-size:18px;">3. Program experience</h2>
+            <div class="error" id="errorMessage" role="alert" aria-live="polite" aria-atomic="true"></div>
+            <div class="sr-only" aria-live="polite" aria-atomic="true" id="announcements"></div>
 
-                <div class="question">
-                    <label class="required">Rate these areas (Excellent / Good / Fair / Poor)</label>
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                        <div>
-                            <label style="font-weight:600; margin-bottom:6px;">Course quality</label>
-                            <select name="rate_course_quality" required>
-                                <option value="">Select</option>
-                                <option value="excellent">Excellent</option>
-                                <option value="good">Good</option>
-                                <option value="fair">Fair</option>
-                                <option value="poor">Poor</option>
-                            </select>
+            <form id="dropoutForm" action="https://formspree.io/f/mkgqekja" method="POST" novalidate>
+                <!-- Section 1 -->
+                <section class="section active" data-section="1" aria-labelledby="section1-heading">
+                    <h2 id="section1-heading" style="color:#003262; margin-bottom:12px; font-size:18px;">1. Basic info</h2>
+
+                    <div class="question">
+                        <label for="name">Name (optional)</label>
+                        <input type="text" id="name" name="name" placeholder="You may leave blank to remain anonymous" aria-describedby="name-help">
+                        <div id="name-help" class="sr-only">This field is optional. Leave blank to remain anonymous.</div>
+                    </div>
+
+                    <div class="question">
+                        <label for="email">Email (optional)</label>
+                        <input type="email" id="email" name="email" placeholder="If you'd like follow-up (optional)" aria-describedby="email-help">
+                        <div id="email-help" class="sr-only">This field is optional. Provide only if you want to be contacted for follow-up.</div>
+                    </div>
+
+                    <div class="question">
+                        <label for="last_term" class="required">Last term enrolled (e.g., Fall 2024)</label>
+                        <input type="text" id="last_term" name="last_term" required aria-describedby="last_term-help">
+                        <div id="last_term-help" class="sr-only">Required field. Enter the last term you were enrolled, for example Fall 2024.</div>
+                    </div>
+                </section>
+
+                <!-- Section 2 -->
+                <section class="section" data-section="2" aria-labelledby="section2-heading">
+                    <h2 id="section2-heading" style="color:#003262; margin-bottom:12px; font-size:18px;">2. Why did you leave?</h2>
+
+                    <fieldset class="question">
+                        <legend class="required">Primary reason for leaving</legend>
+                        <div class="radio-group" role="radiogroup" aria-required="true">
+                            <label class="option"><input type="radio" name="primary_reason" value="financial" required> Financial reasons/cost</label>
+                            <label class="option"><input type="radio" name="primary_reason" value="time_conflict" required> Time/work/life conflict</label>
+                            <label class="option"><input type="radio" name="primary_reason" value="academic_difficulty" required> Academic difficulty</label>
+                            <label class="option"><input type="radio" name="primary_reason" value="program_mismatch" required> Program didn't meet expectations</label>
+                            <label class="option"><input type="radio" name="primary_reason" value="advising_issues" required> Advising / administrative issues</label>
+                            <label class="option"><input type="radio" name="primary_reason" value="health_personal" required> Health / personal reasons</label>
+                            <label class="option"><input type="radio" name="primary_reason" value="other" required> Other (please specify)</label>
                         </div>
-                        <div>
-                            <label style="font-weight:600; margin-bottom:6px;">Faculty support</label>
-                            <select name="rate_faculty_support" required>
-                                <option value="">Select</option>
-                                <option value="excellent">Excellent</option>
-                                <option value="good">Good</option>
-                                <option value="fair">Fair</option>
-                                <option value="poor">Poor</option>
-                            </select>
+                        <input type="text" name="primary_reason_other" id="primaryOther" placeholder="If other, please specify" style="margin-top:10px; display:none;" aria-label="Other reason specification">
+                    </fieldset>
+
+                    <fieldset class="question">
+                        <legend>Were financial aid/scholarships a factor?</legend>
+                        <div class="radio-group" role="radiogroup">
+                            <label class="option"><input type="radio" name="financial_aid_factor" value="yes"> Yes</label>
+                            <label class="option"><input type="radio" name="financial_aid_factor" value="no"> No</label>
+                            <label class="option"><input type="radio" name="financial_aid_factor" value="somewhat"> Somewhat</label>
                         </div>
-                        <div>
-                            <label style="font-weight:600; margin-bottom:6px;">Advising / admin</label>
-                            <select name="rate_advising" required>
-                                <option value="">Select</option>
-                                <option value="excellent">Excellent</option>
-                                <option value="good">Good</option>
-                                <option value="fair">Fair</option>
-                                <option value="poor">Poor</option>
-                            </select>
+                    </fieldset>
+                </section>
+
+                <!-- Section 3 -->
+                <section class="section" data-section="3" aria-labelledby="section3-heading">
+                    <h2 id="section3-heading" style="color:#003262; margin-bottom:12px; font-size:18px;">3. Program experience</h2>
+
+                    <fieldset class="question">
+                        <legend class="required">Rate these areas (Excellent / Good / Fair / Poor)</legend>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                            <div>
+                                <label for="rate_course_quality" style="font-weight:600; margin-bottom:6px;">Course quality</label>
+                                <select id="rate_course_quality" name="rate_course_quality" required aria-describedby="course-quality-help">
+                                    <option value="">Select rating</option>
+                                    <option value="excellent">Excellent</option>
+                                    <option value="good">Good</option>
+                                    <option value="fair">Fair</option>
+                                    <option value="poor">Poor</option>
+                                </select>
+                                <div id="course-quality-help" class="sr-only">Rate the quality of courses in the program</div>
+                            </div>
+                            <div>
+                                <label for="rate_faculty_support" style="font-weight:600; margin-bottom:6px;">Faculty support</label>
+                                <select id="rate_faculty_support" name="rate_faculty_support" required aria-describedby="faculty-support-help">
+                                    <option value="">Select rating</option>
+                                    <option value="excellent">Excellent</option>
+                                    <option value="good">Good</option>
+                                    <option value="fair">Fair</option>
+                                    <option value="poor">Poor</option>
+                                </select>
+                                <div id="faculty-support-help" class="sr-only">Rate the level of support from faculty</div>
+                            </div>
+                            <div>
+                                <label for="rate_advising" style="font-weight:600; margin-bottom:6px;">Advising / admin</label>
+                                <select id="rate_advising" name="rate_advising" required aria-describedby="advising-help">
+                                    <option value="">Select rating</option>
+                                    <option value="excellent">Excellent</option>
+                                    <option value="good">Good</option>
+                                    <option value="fair">Fair</option>
+                                    <option value="poor">Poor</option>
+                                </select>
+                                <div id="advising-help" class="sr-only">Rate the quality of academic advising and administration</div>
+                            </div>
+                            <div>
+                                <label for="rate_program_fit" style="font-weight:600; margin-bottom:6px;">Program fit</label>
+                                <select id="rate_program_fit" name="rate_program_fit" required aria-describedby="program-fit-help">
+                                    <option value="">Select rating</option>
+                                    <option value="excellent">Excellent</option>
+                                    <option value="good">Good</option>
+                                    <option value="fair">Fair</option>
+                                    <option value="poor">Poor</option>
+                                </select>
+                                <div id="program-fit-help" class="sr-only">Rate how well the program fit your needs and expectations</div>
+                            </div>
                         </div>
-                        <div>
-                            <label style="font-weight:600; margin-bottom:6px;">Program fit</label>
-                            <select name="rate_program_fit" required>
-                                <option value="">Select</option>
-                                <option value="excellent">Excellent</option>
-                                <option value="good">Good</option>
-                                <option value="fair">Fair</option>
-                                <option value="poor">Poor</option>
-                            </select>
+                    </fieldset>
+
+                    <div class="question">
+                        <label for="key_issue">Briefly describe any key issue that influenced your decision (optional)</label>
+                        <textarea id="key_issue" name="key_issue" placeholder="Example: scheduling conflicts with work, unexpected costs, etc." aria-describedby="key-issue-help"></textarea>
+                        <div id="key-issue-help" class="sr-only">Optional field to describe specific issues that influenced your decision to leave</div>
+                    </div>
+                </section>
+
+                <!-- Section 4 -->
+                <section class="section" data-section="4" aria-labelledby="section4-heading">
+                    <h2 id="section4-heading" style="color:#003262; margin-bottom:12px; font-size:18px;">4. Suggestions & next steps</h2>
+
+                    <div class="question">
+                        <label for="suggestions" class="required">What could the program change to help retain students like you?</label>
+                        <textarea id="suggestions" name="suggestions" required aria-describedby="suggestions-help"></textarea>
+                        <div id="suggestions-help" class="sr-only">Required field. Provide suggestions for how the program could improve student retention</div>
+                    </div>
+
+                    <fieldset class="question">
+                        <legend>Are you interested in being contacted to discuss your experience?</legend>
+                        <div class="radio-group" role="radiogroup">
+                            <label class="option"><input type="radio" name="contact_ok" value="yes"> Yes — you may contact me</label>
+                            <label class="option"><input type="radio" name="contact_ok" value="no"> No — please do not contact</label>
+                        </div>
+                    </fieldset>
+
+                    <div class="question" id="contactDetails" style="display:none;" aria-live="polite">
+                        <div style="background:#f0f7ff; padding:12px; border-left:4px solid #003262; border-radius:6px; margin-bottom:12px;">
+                            <strong>Contact Information</strong> — Please provide your details for follow-up:
+                        </div>
+                        
+                        <div class="question" id="contactNameField" style="display:none;">
+                            <label for="contact_name" class="required">Name</label>
+                            <input type="text" id="contact_name" name="contact_name" placeholder="Your name for follow-up">
+                        </div>
+
+                        <div class="question" id="contactEmailField" style="display:none;">
+                            <label for="contact_email" class="required">Email</label>
+                            <input type="email" id="contact_email" name="contact_email" placeholder="Your email for follow-up">
                         </div>
                     </div>
-                </div>
 
-                <div class="question">
-                    <label>Briefly describe any key issue that influenced your decision (optional)</label>
-                    <textarea name="key_issue" placeholder="Example: scheduling conflicts with work, unexpected costs, etc."></textarea>
-                </div>
+                    <div style="background:#f0f7ff; padding:12px; border-left:4px solid #003262; border-radius:6px; margin-top:12px;">
+                        <strong>Thank you.</strong> Submitting this form will send the responses to the program staff. You can also download a copy before submitting.
+                    </div>
+                </section>
+
+                <nav class="buttons" role="navigation" aria-label="Form navigation">
+                    <button type="button" class="btn-muted" id="prevBtn" style="display:none;" aria-describedby="prev-help">Previous</button>
+                    <button type="button" class="btn-primary" id="nextBtn" aria-describedby="next-help">Next</button>
+                    <button type="button" class="btn-success" id="submitBtn" style="display:none;" aria-describedby="submit-help">Submit</button>
+                    <button type="button" class="btn-muted" id="downloadBtn" style="margin-left:auto;" aria-describedby="download-help">Download CSV</button>
+                    <div class="sr-only">
+                        <div id="prev-help">Go to previous section of the form</div>
+                        <div id="next-help">Go to next section of the form</div>
+                        <div id="submit-help">Submit the completed form</div>
+                        <div id="download-help">Download your responses as a CSV file</div>
+                    </div>
+                </nav>
+            </form>
+
+            <div class="completion" id="completionMessage" role="alert" aria-live="polite">
+                <h2 style="color:#2e7d32;">✓ Thank you — Response recorded</h2>
+                <p style="color:#555;">We appreciate your feedback. If you agreed to be contacted, someone may follow up.</p>
+                <button class="btn-success" id="completionDownload" aria-describedby="completion-download-help">Download Responses (CSV)</button>
+                <div id="completion-download-help" class="sr-only">Download a copy of your submitted responses</div>
             </div>
-
-            <!-- Section 4 -->
-            <div class="section" data-section="4">
-                <h2 style="color:#003262; margin-bottom:12px; font-size:18px;">4. Suggestions & next steps</h2>
-
-                <div class="question">
-                    <label class="required">What could the program change to help retain students like you?</label>
-                    <textarea name="suggestions" required></textarea>
-                </div>
-
-                <div class="question">
-                    <label>Are you interested in being contacted to discuss your experience?</label>
-                    <div class="radio-group">
-                        <label class="option"><input type="radio" name="contact_ok" value="yes"> Yes — you may contact me</label>
-                        <label class="option"><input type="radio" name="contact_ok" value="no"> No — please do not contact</label>
-                    </div>
-                </div>
-
-                <div class="question" id="contactDetails" style="display:none;">
-                    <div style="background:#f0f7ff; padding:12px; border-left:4px solid #003262; border-radius:6px; margin-bottom:12px;">
-                        <strong>Contact Information</strong> — Please provide your details for follow-up:
-                    </div>
-                    
-                    <div class="question" id="contactNameField" style="display:none;">
-                        <label class="required">Name</label>
-                        <input type="text" name="contact_name" placeholder="Your name for follow-up">
-                    </div>
-
-                    <div class="question" id="contactEmailField" style="display:none;">
-                        <label class="required">Email</label>
-                        <input type="email" name="contact_email" placeholder="Your email for follow-up">
-                    </div>
-                </div>
-
-                <div style="background:#f0f7ff; padding:12px; border-left:4px solid #003262; border-radius:6px; margin-top:12px;">
-                    <strong>Thank you.</strong> Submitting this form will send the responses to the program staff. You can also download a copy before submitting.
-                </div>
-            </div>
-
-            <div class="buttons">
-                <button type="button" class="btn-muted" id="prevBtn" style="display:none;">Previous</button>
-                <button type="button" class="btn-primary" id="nextBtn">Next</button>
-                <button type="button" class="btn-success" id="submitBtn" style="display:none;">Submit</button>
-                <button type="button" class="btn-muted" id="downloadBtn" style="margin-left:auto;">Download CSV</button>
-            </div>
-        </form>
-
-        <div class="completion" id="completionMessage">
-            <h2 style="color:#2e7d32;">✓ Thank you — Response recorded</h2>
-            <p style="color:#555;">We appreciate your feedback. If you agreed to be contacted, someone may follow up.</p>
-            <button class="btn-success" id="completionDownload">Download Responses (CSV)</button>
-        </div>
+        </main>
     </div>
 
     <script>
@@ -263,6 +345,7 @@
                     
                     if (r.value === 'yes' && r.checked) {
                         contactDetails.style.display = 'block';
+                        announceToScreenReader('Contact information section is now visible.');
                         
                         // Check if name/email were provided in section 1
                         const originalName = document.querySelector('input[name="name"]').value.trim();
@@ -289,11 +372,34 @@
                         }
                     } else {
                         contactDetails.style.display = 'none';
+                        announceToScreenReader('Contact information section is now hidden.');
                         nameInput.required = false;
                         emailInput.required = false;
                         nameInput.value = '';
                         emailInput.value = '';
                     }
+                });
+            });
+
+            // Keyboard navigation for radio groups
+            document.querySelectorAll('.radio-group').forEach(group => {
+                const radios = group.querySelectorAll('input[type="radio"]');
+                radios.forEach((radio, index) => {
+                    radio.addEventListener('keydown', (e) => {
+                        if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+                            e.preventDefault();
+                            const next = radios[(index + 1) % radios.length];
+                            next.focus();
+                            next.checked = true;
+                            next.dispatchEvent(new Event('change'));
+                        } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+                            e.preventDefault();
+                            const prev = radios[(index - 1 + radios.length) % radios.length];
+                            prev.focus();
+                            prev.checked = true;
+                            prev.dispatchEvent(new Event('change'));
+                        }
+                    });
                 });
             });
         }
@@ -306,6 +412,23 @@
             document.getElementById('nextBtn').style.display = n<total ? 'inline-block' : 'none';
             document.getElementById('submitBtn').style.display = n===total ? 'inline-block' : 'none';
             window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            // Update progress bar accessibility
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            const pct = (n / total) * 100;
+            progressBar.parentElement.setAttribute('aria-valuenow', pct);
+            progressText.textContent = `Step ${n} of ${total} complete`;
+            
+            // Announce section change
+            const sectionHeading = document.querySelector(`[data-section="${n}"] h2`);
+            if (sectionHeading) {
+                announceToScreenReader(`Now on ${sectionHeading.textContent}`);
+                // Focus the section heading for screen readers
+                sectionHeading.setAttribute('tabindex', '-1');
+                sectionHeading.focus();
+                setTimeout(() => sectionHeading.removeAttribute('tabindex'), 100);
+            }
         }
 
         function updateProgress() {
@@ -337,7 +460,13 @@
 
             if (!ok) {
                 showError('Please complete all required fields on this page before continuing.');
-                if (first) first.scrollIntoView({ behavior: 'smooth', block:'center' });
+                announceToScreenReader('Form validation failed. Please complete all required fields.');
+                if (first) {
+                    first.scrollIntoView({ behavior: 'smooth', block:'center' });
+                    first.focus();
+                }
+            } else {
+                announceToScreenReader('All required fields completed successfully.');
             }
             return ok;
         }
@@ -380,6 +509,7 @@
 
             const submitBtn = document.getElementById('submitBtn');
             submitBtn.disabled = true; submitBtn.textContent = 'Submitting...';
+            announceToScreenReader('Submitting form, please wait...');
 
             fetch('https://formspree.io/f/mkgqekja', {
                 method: 'POST',
@@ -390,11 +520,14 @@
                     document.getElementById('dropoutForm').style.display = 'none';
                     document.querySelector('.progress').style.display = 'none';
                     document.getElementById('completionMessage').classList.add('active');
+                    announceToScreenReader('Form submitted successfully. Thank you for your feedback.');
+                    document.getElementById('completionMessage').focus();
                 } else {
                     return res.json().then(j => { throw j; });
                 }
             }).catch(() => {
                 showError('Submission failed. You can download your responses and email them to program staff.');
+                announceToScreenReader('Form submission failed. You can download your responses as a backup.');
                 submitBtn.disabled = false; submitBtn.textContent = 'Submit';
             });
         }
@@ -433,6 +566,13 @@
         }
         function hideError() {
             const e = document.getElementById('errorMessage'); e.classList.remove('active');
+        }
+
+        function announceToScreenReader(message) {
+            const announcements = document.getElementById('announcements');
+            announcements.textContent = message;
+            // Clear after announcement
+            setTimeout(() => announcements.textContent = '', 1000);
         }
     </script>
 </body>
