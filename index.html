@@ -57,12 +57,12 @@
                 <h2 style="color:#003262; margin-bottom:12px; font-size:18px;">1. Basic info</h2>
 
                 <div class="question">
-                    <label class="required">Name (optional)</label>
+                    <label>Name (optional)</label>
                     <input type="text" name="name" placeholder="You may leave blank to remain anonymous">
                 </div>
 
                 <div class="question">
-                    <label class="required">Email (optional)</label>
+                    <label>Email (optional)</label>
                     <input type="email" name="email" placeholder="If you'd like follow-up (optional)">
                 </div>
 
@@ -174,6 +174,22 @@
                     </div>
                 </div>
 
+                <div class="question" id="contactDetails" style="display:none;">
+                    <div style="background:#f0f7ff; padding:12px; border-left:4px solid #003262; border-radius:6px; margin-bottom:12px;">
+                        <strong>Contact Information</strong> — Please provide your details for follow-up:
+                    </div>
+                    
+                    <div class="question" id="contactNameField" style="display:none;">
+                        <label class="required">Name</label>
+                        <input type="text" name="contact_name" placeholder="Your name for follow-up">
+                    </div>
+
+                    <div class="question" id="contactEmailField" style="display:none;">
+                        <label class="required">Email</label>
+                        <input type="email" name="contact_email" placeholder="Your email for follow-up">
+                    </div>
+                </div>
+
                 <div style="background:#f0f7ff; padding:12px; border-left:4px solid #003262; border-radius:6px; margin-top:12px;">
                     <strong>Thank you.</strong> Submitting this form will send the responses to the program staff. You can also download a copy before submitting.
                 </div>
@@ -233,6 +249,51 @@
                     const other = document.getElementById('primaryOther');
                     if (r.value === 'other' && r.checked) { other.style.display = 'block'; other.required = true; }
                     else if (!document.querySelector('input[name="primary_reason"][value="other"]')?.checked) { other.style.display = 'none'; other.value=''; other.required = false; }
+                });
+            });
+            
+            // show/hide contact details based on contact_ok selection
+            document.querySelectorAll('input[name="contact_ok"]').forEach(r => {
+                r.addEventListener('change', () => {
+                    const contactDetails = document.getElementById('contactDetails');
+                    const contactNameField = document.getElementById('contactNameField');
+                    const contactEmailField = document.getElementById('contactEmailField');
+                    const nameInput = document.querySelector('input[name="contact_name"]');
+                    const emailInput = document.querySelector('input[name="contact_email"]');
+                    
+                    if (r.value === 'yes' && r.checked) {
+                        contactDetails.style.display = 'block';
+                        
+                        // Check if name/email were provided in section 1
+                        const originalName = document.querySelector('input[name="name"]').value.trim();
+                        const originalEmail = document.querySelector('input[name="email"]').value.trim();
+                        
+                        // Show name field if not provided originally
+                        if (!originalName) {
+                            contactNameField.style.display = 'block';
+                            nameInput.required = true;
+                        } else {
+                            contactNameField.style.display = 'none';
+                            nameInput.required = false;
+                            nameInput.value = '';
+                        }
+                        
+                        // Show email field if not provided originally
+                        if (!originalEmail) {
+                            contactEmailField.style.display = 'block';
+                            emailInput.required = true;
+                        } else {
+                            contactEmailField.style.display = 'none';
+                            emailInput.required = false;
+                            emailInput.value = '';
+                        }
+                    } else {
+                        contactDetails.style.display = 'none';
+                        nameInput.required = false;
+                        emailInput.required = false;
+                        nameInput.value = '';
+                        emailInput.value = '';
+                    }
                 });
             });
         }
@@ -295,6 +356,14 @@
                     data[i.name] = i.value;
                 }
             });
+            
+            // If contact fields were filled, use them as the primary contact info
+            if (data.contact_name && data.contact_name.trim()) {
+                data.name = data.contact_name;
+            }
+            if (data.contact_email && data.contact_email.trim()) {
+                data.email = data.contact_email;
+            }
         }
 
         function submitForm() {
